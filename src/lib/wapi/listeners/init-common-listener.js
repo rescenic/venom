@@ -116,7 +116,7 @@ export function initNewMessagesListener() {
       if (callbackObj.callback !== undefined) {
         callbackObj.callback({
           status: -1,
-          message: 'page will be reloaded, wait and register callback again.',
+          message: 'page will be reloaded, wait and register callback again.'
         });
       }
     });

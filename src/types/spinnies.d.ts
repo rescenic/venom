@@ -190,7 +190,9 @@ declare module 'spinnies' {
      */
     stopAll: (
       status?: Spinnies.StopAllStatus
-    ) => { [name: string]: Spinnies.SpinnerOptions };
+    ) => {
+      [name: string]: Spinnies.SpinnerOptions;
+    };
 
     /**
      * @returns false if all spinners have succeeded, failed or have been stopped

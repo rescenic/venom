@@ -64,7 +64,7 @@ import {
   SendFileResult,
   SendLinkResult,
   SendStickerResult,
-  WhatsappProfile,
+  WhatsappProfile
 } from '../api/model';
 import { tokenSession } from '../config/tokenSession.config';
 
@@ -112,6 +112,7 @@ interface WAPI {
   getGroupAdmins: (groupId: string) => Contact[];
   getGroupInfoFromInviteLink: (inviteCode: string) => Promise<string | boolean>;
   getGroupInviteLink: (chatId: string) => Promise<string>;
+  revokeGroupInviteLink: (chatId: string) => Promise<boolean>;
   getGroupParticipantIDs: (groupId: string) => Id[];
   getHost: () => HostDevice;
   getListMute: (type?: string) => object;
@@ -247,6 +248,7 @@ interface WAPI {
   sendSeen: (to: string) => void;
   returnReply: (message: object) => object;
   onStreamChange: (callback: Function) => void;
+  setGroupDescription: (groupId: string, description: string) => object;
 }
 
 declare global {

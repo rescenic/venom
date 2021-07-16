@@ -58,11 +58,7 @@ import { ScrapQrcode } from '../model/qrcode';
 export async function scrapeImg(page: Page): Promise<ScrapQrcode | undefined> {
   let click = await page
     .evaluate(() => {
-      const selectorImg = document.querySelector('canvas');
-      const selectorUrl = selectorImg.closest('[data-ref]');
-      const buttonReload = selectorUrl.querySelector(
-        '[role="button"]'
-      ) as HTMLButtonElement;
+      const buttonReload = document.querySelector('button');
       if (buttonReload != null) {
         buttonReload.click();
         return true;
@@ -83,7 +79,7 @@ export async function scrapeImg(page: Page): Promise<ScrapQrcode | undefined> {
       if (selectorImg != null && selectorUrl != null) {
         let data = {
           base64Image: selectorImg.toDataURL(),
-          urlCode: selectorUrl.getAttribute('data-ref'),
+          urlCode: selectorUrl.getAttribute('data-ref')
         };
         return data;
       } else {

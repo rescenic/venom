@@ -1,3 +1,56 @@
+## [3.0.21](https://github.com/orkestral/venom/compare/v3.0.20...v3.0.21) (2021-07-09)
+
+
+### Bug Fixes
+
+* chat not exist ([082a80a](https://github.com/orkestral/venom/commit/082a80aecb493972b198186fa802c328573a6932))
+* Parcial fix webpack ([4dce474](https://github.com/orkestral/venom/commit/4dce4748308c7f5a0b4d2dfed88ddf856382f082))
+
+
+
+## [3.0.20](https://github.com/orkestral/venom/compare/v3.0.19...v3.0.20) (2021-06-24)
+
+
+### Bug Fixes
+
+* send-loacation ([92446ea](https://github.com/orkestral/venom/commit/92446ea447deafe88b363f5e6294b9ee95274512))
+* sendContactVcardList ([e6518cc](https://github.com/orkestral/venom/commit/e6518cc7e98031a8a62fe0606b08b8a26245dd70))
+
+
+
+## [3.0.19](https://github.com/orkestral/venom/compare/v3.0.18...v3.0.19) (2021-06-22)
+
+
+### Bug Fixes
+
+* getGroupInviteLink (await) ([7040168](https://github.com/orkestral/venom/commit/70401688b0104af74610ac5f40d5ef123a5888b1))
+* queryGroupInviteInfo ([48e1086](https://github.com/orkestral/venom/commit/48e10863eb2fecf4b405ade38c4bb1a00e2bb3ed))
+* revokeGroupInviteLink (export) ([07947c3](https://github.com/orkestral/venom/commit/07947c326fc42c457b21cdbd74cab8f76726bc1b))
+* sendContactVcard ([e47ff16](https://github.com/orkestral/venom/commit/e47ff16c44e0b0025a653b347df667d8bcabca82))
+* typescript ([5e345a9](https://github.com/orkestral/venom/commit/5e345a941ece883d9875578035da5aabd9faadee))
+
+
+### Features
+
+* Change group description ([c635644](https://github.com/orkestral/venom/commit/c6356445b12eeae77306efc000202f6f353e0839))
+* Support ([190be33](https://github.com/orkestral/venom/commit/190be33cecca2b7a528c991bd879c5b6269b7faf))
+
+
+
+## [3.0.18](https://github.com/orkestral/venom/compare/v3.0.17...v3.0.18) (2021-06-04)
+
+
+### Bug Fixes
+
+* Button Reload ([ae20c9f](https://github.com/orkestral/venom/commit/ae20c9f5b13a113e56e3201b9e830bd7775a1c20))
+* deleteMessages ([da56acb](https://github.com/orkestral/venom/commit/da56acb08e3b966176059418a8eeb24034997a26))
+* queryExist ([1e5e2a6](https://github.com/orkestral/venom/commit/1e5e2a67f5f4b92537946da2aeb58f208dce59f6))
+* RevokeGroup and getGroupInviteLink ([55e1310](https://github.com/orkestral/venom/commit/55e1310ab1cc3b202b0b30222c27d925bdae1913))
+* statusFind ([ef9dc78](https://github.com/orkestral/venom/commit/ef9dc78af8592ac75089ad43d0098020218990af))
+* WidFactory ([c2a51e7](https://github.com/orkestral/venom/commit/c2a51e7aa0c00dc499bb5aeeba318d0c70e73232))
+
+
+
 ## [3.0.16](https://github.com/orkestral/venom/compare/v3.0.15...v3.0.16) (2021-05-04)
 
 
