@@ -52,23 +52,20 @@ MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNMMNMNMMMNMMNNMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNNNNMMNNNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 */
-export * from './api/model';
-export {
-  AckType,
-  ChatState,
-  GroupChangeEvent,
-  GroupNotificationType,
-  GroupSettings,
-  MessageType,
-  SocketState,
-  InterfaceMode,
-  InterfaceState
-} from './api/model/enum';
-export { Whatsapp } from './api/whatsapp';
-export { CreateConfig } from './config/create-config';
-export {
-  create,
-  CatchQR,
-  CreateOptions,
-  StatusFind
-} from './controllers/initializer';
+
+/**
+ * Send message with options
+ * @param {string} chatid the numberid xxx@c.us
+ * @param {string} title the titulo
+ * @param {string} description the description
+ * @param {array} buttons arrays
+ */
+export async function sendButtons(chatId, title, buttons, description = '') {
+  let options = {
+    footer: description,
+    isDynamicReplyButtonsMsg: true,
+    dynamicReplyButtons: buttons
+  };
+
+  return WAPI.sendMessageOptions(chatId, title, options);
+}
