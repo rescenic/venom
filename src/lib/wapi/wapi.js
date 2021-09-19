@@ -160,7 +160,8 @@ import {
   setGroupDescription,
   setGroupTitle,
   setGroupSettings,
-  sendButtons
+  sendButtons,
+  sendListMenu
 } from './functions';
 import {
   base64ToFile,
@@ -275,6 +276,7 @@ if (typeof window.WAPI === 'undefined') {
   window.WAPI.setGroupSettings = setGroupSettings;
 
   // Chatting functions
+  window.WAPI.sendListMenu = sendListMenu;
   window.WAPI.sendChatstate = sendChatstate;
   window.WAPI.sendMessageWithThumb = sendMessageWithThumb;
   window.WAPI.processMessageObj = processMessageObj;
@@ -474,6 +476,7 @@ if (typeof window.WAPI === 'undefined') {
   window.WAPI.checkNumberStatus = async function (id) {
     try {
       const result = await window.Store.WapQuery.queryExist(id);
+      if (result.status === 404) throw 404;
       if (result.jid === undefined) throw 404;
       const data = window.WAPI._serializeNumberStatusObj(result);
       if (data.status == 200) data.numberExists = true;

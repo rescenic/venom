@@ -1,6 +1,6 @@
 {
   "name": "venom-bot",
-  "version": "3.1.4",
+  "version": "3.1.6",
   "description": "Venom is a high-performance system developed with JavaScript to create a bot for WhatsApp, support for creating any interaction, such as customer service, media sending, sentence recognition based on artificial intelligence and all types of design architecture for WhatsApp. ",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -108,7 +108,7 @@
   "dependencies": {
     "atob": "^2.1.2",
     "axios": "^0.21.4",
-    "boxen": "^5.0.1",
+    "boxen": "^5.1.1",
     "catch-exit": "^1.1.0",
     "chalk": "^4.0.0",
     "chrome-launcher": "^0.14.0",
