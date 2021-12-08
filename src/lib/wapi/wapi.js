@@ -63,7 +63,8 @@ import {
   clearChatMessages,
   createGroup,
   deleteConversation,
-  deleteMessages,
+  deleteMessagesAll,
+  deleteMessagesMe,
   demoteParticipant,
   downloadFile,
   encryptAndUploadFile,
@@ -161,7 +162,10 @@ import {
   setGroupTitle,
   setGroupSettings,
   sendButtons,
-  sendListMenu
+  sendListMenu,
+  checkChat,
+  checkNumberStatus,
+  sendCheckType
 } from './functions';
 import {
   base64ToFile,
@@ -184,9 +188,9 @@ import {
   _serializeChatObj,
   _serializeContactObj,
   _serializeMessageObj,
-  _serializeNumberStatusObj,
   _serializeProfilePicThumb,
-  _serializeRawObj
+  _serializeRawObj,
+  _serializeMeObj
 } from './serializers';
 import { getStore } from './store/get-store';
 
@@ -212,10 +216,11 @@ var loadParasite = function () {
     try {
       const last = window['webpackChunkwhatsapp_web_client'].length - 1;
       if (
-        !/^parasite/.test(
-          window['webpackChunkwhatsapp_web_client'][last][0][0]
+        !window['webpackChunkwhatsapp_web_client'][last][0].includes(
+          'parasite'
         ) &&
-        (document.querySelectorAll('#app .two').length ||
+        (document.querySelectorAll('#app').length ||
+          document.querySelectorAll('#app .two').length ||
           document.querySelector('canvas') ||
           document.querySelectorAll('#startup').length == 0)
       ) {
@@ -235,7 +240,9 @@ if (typeof window.WAPI === 'undefined') {
   window.WAPI.interfaceMute = interfaceMute;
   window.WAPI.checkIdMessage = checkIdMessage;
   window.WAPI.returnReply = returnReply;
-  window.WAPI.getStore = getStore;
+  window.WAPI.checkChat = checkChat;
+  window.WAPI.checkNumberStatus = checkNumberStatus;
+  window.WAPI.sendCheckType = sendCheckType;
 
   //Profile
   window.WAPI.setProfilePic = setProfilePic;
@@ -256,8 +263,8 @@ if (typeof window.WAPI === 'undefined') {
   window.WAPI._serializeChatObj = _serializeChatObj;
   window.WAPI._serializeContactObj = _serializeContactObj;
   window.WAPI._serializeMessageObj = _serializeMessageObj;
-  window.WAPI._serializeNumberStatusObj = _serializeNumberStatusObj;
   window.WAPI._serializeProfilePicThumb = _serializeProfilePicThumb;
+  window.WAPI._serializeMeObj = _serializeMeObj;
 
   // Group Functions
   window.WAPI.createGroup = createGroup;
@@ -285,7 +292,8 @@ if (typeof window.WAPI === 'undefined') {
   window.WAPI.sendMessage2 = sendMessage2;
   window.WAPI.sendSeen = sendSeen;
   window.WAPI.deleteConversation = deleteConversation;
-  window.WAPI.deleteMessages = deleteMessages;
+  window.WAPI.deleteMessagesAll = deleteMessagesAll;
+  window.WAPI.deleteMessagesMe = deleteMessagesMe;
   window.WAPI.clearChatMessages = clearChatMessages;
   window.WAPI.sendImage = sendImage;
   window.WAPI.sendPtt = sendPtt;
@@ -455,38 +463,6 @@ if (typeof window.WAPI === 'undefined') {
         ''
       )
     );
-  };
-
-  window.WAPI._serializeNumberStatusObj = (obj) => {
-    if (obj == undefined) {
-      return null;
-    }
-
-    return Object.assign(
-      {},
-      {
-        id: obj.jid,
-        status: obj.status,
-        isBusiness: obj.biz === true,
-        canReceiveMessage: obj.status === 200
-      }
-    );
-  };
-
-  window.WAPI.checkNumberStatus = async function (id) {
-    try {
-      const result = await window.Store.WapQuery.queryExist(id);
-      if (result.status === 404) throw 404;
-      if (result.jid === undefined) throw 404;
-      const data = window.WAPI._serializeNumberStatusObj(result);
-      if (data.status == 200) data.numberExists = true;
-      return data;
-    } catch (e) {
-      return window.WAPI._serializeNumberStatusObj({
-        status: e,
-        jid: new window.Store.WidFactory.createWid(id)
-      });
-    }
   };
 
   window.WAPI.getChatIsOnline = async function (chatId) {

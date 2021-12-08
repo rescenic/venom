@@ -55,21 +55,23 @@ MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 
 import * as chalk from 'chalk';
 
-import { readFileSync } from 'fs';
+import * as fs from 'fs';
+
+import { fstat, readFileSync } from 'fs';
 
 import { Browser, Page } from 'puppeteer';
+
+import path = require('path');
 
 import { deleteFiles, checkingCloses } from '../api/helpers';
 import { Whatsapp } from '../api/whatsapp';
 import { CreateConfig, defaultOptions } from '../config/create-config';
 import { tokenSession } from '../config/tokenSession.config';
-
 import { checkFileJson } from '../api/helpers/check-token-file';
 import { SocketState, SocketStream } from '../api/model/enum';
-
 import { SessionTokenCkeck, saveToken } from './auth';
 import { initWhatsapp, initBrowser } from './browser';
-import { checkUpdates, welcomeScreen } from './welcome';
+import { welcomeScreen } from './welcome';
 /**
  * A callback will be received, informing the status of the qrcode
  */
@@ -143,7 +145,6 @@ export async function create(
   browserSessionToken?: tokenSession,
   browserInstance?: BrowserInstance
 ): Promise<Whatsapp> {
-  let instance = 'session';
   let session = 'session';
 
   if (
@@ -161,6 +162,19 @@ export async function create(
     options = sessionOrOption;
   }
   let browserToken: any;
+  if (options?.multidevice != false) {
+    const dirPath = `./${defaultOptions.folderNameToken}/${session}`;
+
+    let existFile = fs.existsSync(dirPath + '.data.json');
+
+    if (existFile) {
+      fs.unlinkSync(dirPath + '.data.json');
+    }
+
+    defaultOptions.puppeteerOptions = {
+      userDataDir: dirPath
+    };
+  }
 
   const mergedOptions = { ...defaultOptions, ...options };
 
@@ -169,12 +183,6 @@ export async function create(
   if (!mergedOptions.disableWelcome) {
     welcomeScreen();
   }
-
-  // if (mergedOptions.updatesLog) {
-  //   const ver = await checkUpdates();
-  //   throw `Unable to access: "https://www.npmjs.com", check your internet`;
-  // }
-
   // Initialize whatsapp
   if (mergedOptions.browserWS) {
     logger.info('Initializing browser...', { session });
@@ -183,7 +191,6 @@ export async function create(
   }
 
   const browser = await initBrowser(session, mergedOptions);
-
   // Erro of connect wss
   if (typeof browser === 'string' && browser === 'connect') {
     logger.info('Error when try to connect ' + mergedOptions.browserWS, {
@@ -278,17 +285,21 @@ export async function create(
         statusFind && statusFind('chatsAvailable', session);
       }
       if (stateStream === SocketStream.DISCONNECTED) {
-        let onQR: boolean = await page.evaluate(() => {
-          if (
-            document.querySelector('canvas') &&
-            document.querySelectorAll('#startup').length == 0
-          ) {
-            return true;
-          } else {
-            return false;
+        await page.waitForFunction(
+          () => {
+            if (
+              document.querySelector('canvas') &&
+              document.querySelectorAll('#startup').length == 0
+            ) {
+              return true;
+            }
+          },
+          {
+            timeout: 0,
+            polling: 100
           }
-        });
-        if (onQR === true && checkFileJson(mergedOptions, session)) {
+        );
+        if (checkFileJson(mergedOptions, session)) {
           if (statusFind) {
             statusFind('desconnectedMobile', session);
           }
@@ -297,19 +308,21 @@ export async function create(
       }
     });
 
-    client.onStateChange((state) => {
+    client.onStateChange(async (state) => {
       if (state === SocketState.PAIRING) {
-        const device = page.evaluate(() => {
-          if (document.querySelectorAll('#startup').length) {
-            return true;
-          } else {
-            return false;
+        await page.waitForFunction(
+          () => {
+            if (document.querySelectorAll('#startup').length) {
+              return true;
+            }
+          },
+          {
+            timeout: 0,
+            polling: 100
           }
-        });
-        if (device) {
-          if (statusFind) {
-            statusFind('deviceNotConnected', session);
-          }
+        );
+        if (statusFind) {
+          statusFind('deviceNotConnected', session);
         }
       }
       if (mergedOptions.createPathFileToken) {
