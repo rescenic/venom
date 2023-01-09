@@ -1,3 +1,196 @@
+## [4.3.7](https://github.com/orkestral/venom/compare/v4.3.6...v4.3.7) (2022-12-01)
+
+
+
+## [4.3.6](https://github.com/orkestral/venom/compare/v4.3.4...v4.3.6) (2022-11-24)
+
+
+
+## [4.3.4](https://github.com/orkestral/venom/compare/v4.3.3...v4.3.4) (2022-11-18)
+
+
+
+## [4.3.3](https://github.com/orkestral/venom/compare/v4.3.2...v4.3.3) (2022-11-08)
+
+
+
+## [4.3.2](https://github.com/orkestral/venom/compare/v4.3.1...v4.3.2) (2022-11-08)
+
+
+
+## [4.3.1](https://github.com/orkestral/venom/compare/v4.3.0...v4.3.1) (2022-11-07)
+
+
+### Bug Fixes
+
+* alterado ordem de inicialização ([f782610](https://github.com/orkestral/venom/commit/f7826106b05b361123fe6c8f724408dab68d22df))
+* getAllUnreadMessages ack incorreto ([c39c3a0](https://github.com/orkestral/venom/commit/c39c3a09d8e41413512ea35f6f958b80e9cd4d30))
+* loadAllEarlierMessages e retorno da loadAndGetAllMessagesInChat ([4e2a198](https://github.com/orkestral/venom/commit/4e2a198109677df4be10a82ed99cfca8d4230f10))
+
+
+
+# [4.3.0](https://github.com/orkestral/venom/compare/v4.2.3...v4.3.0) (2022-08-15)
+
+
+
+## [4.2.3](https://github.com/orkestral/venom/compare/v4.2.2...v4.2.3) (2022-08-08)
+
+
+
+## [4.2.2](https://github.com/orkestral/venom/compare/v4.2.1...v4.2.2) (2022-08-08)
+
+
+
+## [4.2.1](https://github.com/orkestral/venom/compare/v4.2.0...v4.2.1) (2022-08-08)
+
+
+### Bug Fixes
+
+* e.isLid is not a function ([88209cf](https://github.com/orkestral/venom/commit/88209cf86d706935bb5f59884097959bd32385e0))
+* queryExists ([267372a](https://github.com/orkestral/venom/commit/267372a7fa6183298965644983c3978521bb0fb9))
+
+
+
+# [4.2.0](https://github.com/orkestral/venom/compare/v4.1.0...v4.2.0) (2022-06-09)
+
+
+### Bug Fixes
+
+* **wapi:** fix sendFile function issue [#1718](https://github.com/orkestral/venom/issues/1718) ([ed89eb7](https://github.com/orkestral/venom/commit/ed89eb797b78c884898a49d23d33691ee3cb6eb2))
+* Bug Fix send message with media
+
+
+# [4.1.0](https://github.com/orkestral/venom/compare/v4.0.11...v4.1.0) (2022-06-02)
+
+### Features
+
+* Bug Fix e.isUser
+* Change target TS
+
+## [4.0.11](https://github.com/orkestral/venom/compare/v4.0.10...v4.0.11) (2022-04-27)
+
+
+### Features
+
+* addBrowserArgs ([6541669](https://github.com/orkestral/venom/commit/654166943f8d256a07fc1163c49681c16a783a65))
+* statusFind ([7ee608d](https://github.com/orkestral/venom/commit/7ee608d20595146e4287635f3844db403a08b17f))
+
+
+
+## [4.0.10](https://github.com/orkestral/venom/compare/v4.0.9...v4.0.10) (2022-04-18)
+
+
+### Bug Fixes
+
+* lint ([890d7b3](https://github.com/orkestral/venom/commit/890d7b37a8a571794d46c0c7b1a857ca48f045c0))
+* module Cmd is now a class, no longer exported in the `default` key ([b21b11f](https://github.com/orkestral/venom/commit/b21b11f53261d50735782d3d73cea1d639dfaedd))
+* sendLinkPreview ([d00634a](https://github.com/orkestral/venom/commit/d00634a5b44adc47517708bc22c220576b269ec8))
+* sendLocation ([921e2f0](https://github.com/orkestral/venom/commit/921e2f016f55522ba49e51563a21f09dfa13ec52))
+* type definition and code expect a promise from isBeta ([b7b9ccb](https://github.com/orkestral/venom/commit/b7b9ccb5156a83027ab028a71e4f0a81996d8ec3))
+* **wapi:** sendMessage function throw exception on invalid object ([4332fce](https://github.com/orkestral/venom/commit/4332fce89820a287921708e361990caf4ea903fb))
+
+
+### Features
+
+* device ([21d4173](https://github.com/orkestral/venom/commit/21d4173e785cb2228dbd40854561485491926819))
+* remove mandatory descrition sendList ([0098594](https://github.com/orkestral/venom/commit/0098594df2695596cd2ec30c5cf8611b848129ab))
+
+
+
+## [4.0.9](https://github.com/orkestral/venom/compare/v4.0.8...v4.0.9) (2022-03-10)
+
+
+### Bug Fixes
+
+* add queryExists ([bdea56c](https://github.com/orkestral/venom/commit/bdea56c2b2cb7e246e2a8614eaad3fd260868bad))
+* lint ([9bfbead](https://github.com/orkestral/venom/commit/9bfbead2009d617600261f804f0939bb8d7dd921))
+
+
+
+## [4.0.8](https://github.com/orkestral/venom/compare/v4.0.7...v4.0.8) (2022-03-10)
+
+
+### Bug Fixes
+
+* checkNumber ([d0515e7](https://github.com/orkestral/venom/commit/d0515e79db9da39f881c6fc7ef8561187524cd9d))
+
+
+
+## [4.0.7](https://github.com/orkestral/venom/compare/v4.0.6...v4.0.7) (2022-03-01)
+
+
+### Bug Fixes
+
+* Socket ([bca8283](https://github.com/orkestral/venom/commit/bca8283323fdd92274637a92ddb8c94748e21c69))
+* Stream and State ([b71e032](https://github.com/orkestral/venom/commit/b71e032610d0e2935d1b5f8d0a926538b3c97ab6))
+
+
+### Features
+
+* forcing injectApi ([f5404ba](https://github.com/orkestral/venom/commit/f5404ba93ab258664b88ca46dc3702bd9e32fef6))
+* typedoc ([9ca17ec](https://github.com/orkestral/venom/commit/9ca17ec34780ed1811217f1ffde70f4d2a3c2889))
+* webpack sleep ([ec89f4e](https://github.com/orkestral/venom/commit/ec89f4e9114aff587153f5e170cecc5bb801e267))
+
+
+
+## [4.0.6](https://github.com/orkestral/venom/compare/v4.0.5...v4.0.6) (2022-02-23)
+
+
+### Bug Fixes
+
+* checkNumber ([0a20479](https://github.com/orkestral/venom/commit/0a204796998d547da7a3395dcf1985a05edf0935))
+* Product ([d17d3a3](https://github.com/orkestral/venom/commit/d17d3a3ee1597c44749e0cb3173f7f977302782f))
+* sendSticker ([557d1ae](https://github.com/orkestral/venom/commit/557d1ae8b07597d16a77a1a3c27de24240c85685))
+
+
+### Features
+
+* typedoc ([977eb8d](https://github.com/orkestral/venom/commit/977eb8d954956b46c43149de7c6ce1ee4ab16d0b))
+
+
+
+## [4.0.5](https://github.com/orkestral/venom/compare/v4.0.4...v4.0.5) (2022-01-15)
+
+
+### Bug Fixes
+
+* logout ([ee6b6c3](https://github.com/orkestral/venom/commit/ee6b6c33ed2a1bccda588af5f08b156139c9dd41))
+* MessageObj ([deae0e9](https://github.com/orkestral/venom/commit/deae0e9b15b5385572ec32c56d5252f54f3b5ad8))
+
+
+### Features
+
+* addProxy ([22f9f01](https://github.com/orkestral/venom/commit/22f9f01866dc90d0d682500f97116e4e148efe5f))
+* readme ([ab0ff66](https://github.com/orkestral/venom/commit/ab0ff6667b7c127a2e39246c822e65c006118235))
+
+
+
+## [4.0.4](https://github.com/orkestral/venom/compare/v4.0.3...v4.0.4) (2021-12-19)
+
+
+### Bug Fixes
+
+* changed _quotedMsgObj to quotedMsg ([288b65a](https://github.com/orkestral/venom/commit/288b65a6064ef4d0f047004b7fe89e7348244213))
+* logout ([8f08abb](https://github.com/orkestral/venom/commit/8f08abbc2ed9414c9c7d71862d0bc0666eab52eb))
+* sendContactVcard ([d4a4700](https://github.com/orkestral/venom/commit/d4a4700557f1bbf632ba5f70a86477f146462fc6))
+* sendLinkPreview ([de3b0a7](https://github.com/orkestral/venom/commit/de3b0a71fc2a0ac0786c935c7599b8881a993430))
+* setProfilePic ([ddc8184](https://github.com/orkestral/venom/commit/ddc81844c5fb76be3ece25d715bd032ed07fa36e))
+* sticker ([6506d40](https://github.com/orkestral/venom/commit/6506d408863f740afc03e5325fb79345c7803960))
+* Store.State ([54dcd8e](https://github.com/orkestral/venom/commit/54dcd8e14c1895d7a45f8fd257118ddce03eccc1))
+
+
+### Features
+
+* checkNumber ([a2708e5](https://github.com/orkestral/venom/commit/a2708e5c559366a9395bff7b7ce76d9d3f0fc850))
+* checkNumberStatus ([15e8224](https://github.com/orkestral/venom/commit/15e822496b96f12187446db615ed9502b0b2bbaf))
+* multidevice and chromiumVersion ([4f8fe94](https://github.com/orkestral/venom/commit/4f8fe94b9ade9e6e291c5864ddbb97a9347a2531))
+* SerializeMeObj ([5d72a61](https://github.com/orkestral/venom/commit/5d72a61c4782009f19dd841ac5191a0e3a001721))
+* test typedoc ([5e4007f](https://github.com/orkestral/venom/commit/5e4007fd338c306d51d07e5b7c9028ef5610ff1c))
+* typedoc ([bb58502](https://github.com/orkestral/venom/commit/bb58502f747a023eb884fabdf3c1a6a54c0484e9))
+* update puppeteer ([b8ca6b6](https://github.com/orkestral/venom/commit/b8ca6b633a77c4e14535083586a46a58bfa6d777))
+
+
+
 ## [4.0.3](https://github.com/orkestral/venom/compare/v4.0.2...v4.0.3) (2021-11-24)
 
 

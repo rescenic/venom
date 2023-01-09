@@ -145,6 +145,7 @@ import {
   killServiceWorker,
   sendLinkPreview,
   scope,
+  newId,
   getchatId,
   sendExist,
   sendContactVcardList,
@@ -165,13 +166,15 @@ import {
   sendListMenu,
   checkChat,
   checkNumberStatus,
-  sendCheckType
+  sendCheckType,
+  isBeta
 } from './functions';
 import {
   base64ToFile,
   generateMediaKey,
   getFileHash,
-  arrayBufferToBase64
+  arrayBufferToBase64,
+  sleep
 } from './helper';
 import {
   addNewMessagesListener,
@@ -190,14 +193,16 @@ import {
   _serializeMessageObj,
   _serializeProfilePicThumb,
   _serializeRawObj,
-  _serializeMeObj
+  _serializeMeObj,
+  _serializeNumberStatusObj
 } from './serializers';
 import { getStore } from './store/get-store';
 
 window['webpackChunkwhatsapp_web_client'] =
   window['webpackChunkwhatsapp_web_client'] || [];
+
 window.Store = {};
-var loadParasite = function () {
+var loadParasite = async function () {
   function injectParasite() {
     const parasite = `parasite`;
     window['webpackChunkwhatsapp_web_client'].push([
@@ -212,7 +217,7 @@ var loadParasite = function () {
       }
     ]);
   }
-  setInterval(() => {
+  while (true) {
     try {
       const last = window['webpackChunkwhatsapp_web_client'].length - 1;
       if (
@@ -225,10 +230,13 @@ var loadParasite = function () {
           document.querySelectorAll('#startup').length == 0)
       ) {
         injectParasite();
+        return;
       }
     } catch (e) {}
-  }, 100);
+    await sleep(1000);
+  }
 };
+
 loadParasite();
 
 if (typeof window.WAPI === 'undefined') {
@@ -243,6 +251,7 @@ if (typeof window.WAPI === 'undefined') {
   window.WAPI.checkChat = checkChat;
   window.WAPI.checkNumberStatus = checkNumberStatus;
   window.WAPI.sendCheckType = sendCheckType;
+  window.WAPI.isBeta = isBeta;
 
   //Profile
   window.WAPI.setProfilePic = setProfilePic;
@@ -250,6 +259,7 @@ if (typeof window.WAPI === 'undefined') {
 
   // Chat Functions
   window.WAPI.scope = scope;
+  window.WAPI.newId = newId;
   window.WAPI.getchatId = getchatId;
   window.WAPI.sendExist = sendExist;
   window.WAPI.pinChat = pinChat;
@@ -265,6 +275,7 @@ if (typeof window.WAPI === 'undefined') {
   window.WAPI._serializeMessageObj = _serializeMessageObj;
   window.WAPI._serializeProfilePicThumb = _serializeProfilePicThumb;
   window.WAPI._serializeMeObj = _serializeMeObj;
+  window.WAPI._serializeNumberStatusObj = _serializeNumberStatusObj;
 
   // Group Functions
   window.WAPI.createGroup = createGroup;

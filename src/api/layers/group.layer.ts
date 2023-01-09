@@ -99,10 +99,14 @@ export class GroupLayer extends RetrieverLayer {
         let _webb64_96 = await resizeImg(buff, { width: 96, height: 96 }),
           _webb64_640 = await resizeImg(buff, { width: 640, height: 640 });
         let obj = { a: _webb64_640, b: _webb64_96 };
-
         return await this.page.evaluate(
-          ({ obj, groupId }) => WAPI.setProfilePic(obj, groupId),
+          async ({ mimeInfo, obj, groupId }) =>
+            await WPP.group.setIcon(
+              groupId,
+              `data:${mimeInfo};base64,` + obj.a
+            ),
           {
+            mimeInfo,
             obj,
             groupId
           }
@@ -113,7 +117,6 @@ export class GroupLayer extends RetrieverLayer {
       }
     }
   }
-
   /**
    * Parameters to change group title
    * @param {string} groupId group number
@@ -316,11 +319,10 @@ export class GroupLayer extends RetrieverLayer {
    * @param groupId
    */
   public async getGroupMembers(groupId: string) {
-    const membersIds = await this.getGroupMembersIds(groupId);
-    const actions = membersIds.map((memberId) => {
-      return this.getContact(memberId._serialized);
-    });
-    return Promise.all(actions);
+    return await this.page.evaluate(
+      (groupId) => WAPI.getGroupParticipantIDs(groupId),
+      groupId
+    );
   }
 
   /**

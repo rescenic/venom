@@ -57,8 +57,8 @@ export async function loadAndGetAllMessagesInChat(
   includeMe,
   includeNotifications
 ) {
-  return WAPI.loadAllEarlierMessages(id).then(() => {
-    const chat = WAPI.getChat(id);
+  return window.WAPI.loadAllEarlierMessages(id).then(() => {
+    const chat = window.WAPI.getChat(id);
     let output = [];
     const messages = chat.msgs._models;
 
@@ -77,4 +77,15 @@ export async function loadAndGetAllMessagesInChat(
     }
     return output;
   });
+}
+
+/**
+ * SYNC version
+ * Loads all earlier messages of given chat id
+ * @param {string} id Chat id
+ * @param {Funciton} done Optional callback
+ */
+export function asyncLoadAllEarlierMessages(id, done) {
+  loadAndGetAllMessagesInChat(id);
+  done();
 }

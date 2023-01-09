@@ -86,24 +86,16 @@ export class SenderLayer extends ListenerLayer {
   public async sendListMenu(
     to: string,
     title: string,
-    subTitle: string,
     description: string,
     buttonText: string,
     menu: Array<any>
   ): Promise<Object> {
     return new Promise(async (resolve, reject) => {
       const result = await this.page.evaluate(
-        ({ to, title, subTitle, description, buttonText, menu }) => {
-          return WAPI.sendListMenu(
-            to,
-            title,
-            subTitle,
-            description,
-            buttonText,
-            menu
-          );
+        ({ to, title, description, buttonText, menu }) => {
+          return WAPI.sendListMenu(to, title, description, buttonText, menu);
         },
-        { to, title, subTitle, description, buttonText, menu }
+        { to, title, description, buttonText, menu }
       );
       if (result['erro'] == true) {
         return reject(result);
@@ -148,11 +140,11 @@ export class SenderLayer extends ListenerLayer {
         },
         { to, content }
       );
-      if (result['erro'] == true) {
-        return reject(result);
-      } else {
-        return resolve(result);
-      }
+      // if (result['erro'] == true) {
+      //   return reject(result);
+      // } else {
+      return resolve(result);
+      // }
     });
   }
 
@@ -214,7 +206,7 @@ export class SenderLayer extends ListenerLayer {
   /**
    * Sends image message base64
    * @param to Chat id
-   * @param base64 File path, http link or base64Encoded
+   * @param base64 File path, http link or base64Encoded. base64 MUST start with "data:(yourMimeType);base64,"
    * @param filename
    * @param caption
    */
@@ -261,7 +253,7 @@ export class SenderLayer extends ListenerLayer {
         obj = {
           erro: true,
           to: to,
-          text: 'Invalid base64!'
+          text: 'Invalid base64 or missing MimeType!'
         };
         return reject(obj);
       }
@@ -327,10 +319,78 @@ export class SenderLayer extends ListenerLayer {
    * @param {string} subtitle the subtitle
    * @param {array} buttons arrays
    */
+  // public async sendButtons(
+  //   to: string,
+  //   title: string,
+  //   buttons: { buttonText: { displayText: string } }[],
+  //   subtitle: string
+  // ): Promise<object> {
+  //   return new Promise(async (resolve, reject) => {
+  //     const typeFunction = 'sendButtons';
+  //     const type = 'string';
+  //     const obj = 'object';
+  //     const check = [
+  //       {
+  //         param: 'to',
+  //         type: type,
+  //         value: to,
+  //         function: typeFunction,
+  //         isUser: true
+  //       },
+  //       {
+  //         param: 'title',
+  //         type: type,
+  //         value: title,
+  //         function: typeFunction,
+  //         isUser: true
+  //       },
+  //       {
+  //         param: 'buttons',
+  //         type: obj,
+  //         value: buttons,
+  //         function: typeFunction,
+  //         isUser: true
+  //       },
+  //       {
+  //         param: 'subtitle',
+  //         type: type,
+  //         value: subtitle,
+  //         function: typeFunction,
+  //         isUser: true
+  //       }
+  //     ];
+  //     const validating = checkValuesSender(check);
+  //     if (typeof validating === 'object') {
+  //       return reject(validating);
+  //     }
+
+  //     const result = await this.page.evaluate(
+  //       ({ to, title, buttons, subtitle }) => {
+  //         let options = {
+  //           useTemplateButtons: false,
+  //           createChat: true,
+  //           buttons: buttons,
+  //           title: title
+  //         };
+  //         return WPP.chat.sendTextMessage(to, subtitle, {
+  //           ...options,
+  //           waitForAck: true
+  //         });
+  //       },
+  //       { to, title, buttons, subtitle }
+  //     );
+
+  //     if (result['erro'] == true) {
+  //       return reject(result);
+  //     } else {
+  //       return resolve(result);
+  //     }
+  //   });
+  // }
   public async sendButtons(
     to: string,
     title: string,
-    buttons: [],
+    buttons: { buttonText: { displayText: string } }[],
     subtitle: string
   ): Promise<object> {
     return new Promise(async (resolve, reject) => {
@@ -474,56 +534,28 @@ export class SenderLayer extends ListenerLayer {
     to: string,
     content: string,
     quotedMsg: string
-  ): Promise<Message | object> {
-    return new Promise(async (resolve, reject) => {
-      const typeFunction = 'reply';
-      const type = 'string';
-      const check = [
-        {
-          param: 'to',
-          type: type,
-          value: to,
-          function: typeFunction,
-          isUser: true
-        },
-        {
-          param: 'content',
-          type: type,
-          value: content,
-          function: typeFunction,
-          isUser: true
-        },
-        {
-          param: 'quotedMsg',
-          type: type,
-          value: quotedMsg,
-          function: typeFunction,
-          isUser: false
-        }
-      ];
-      const validating = checkValuesSender(check);
-      if (typeof validating === 'object') {
-        return reject(validating);
-      }
-      const result: object = await this.page.evaluate(
-        ({ to, content, quotedMsg }) => {
-          return WAPI.reply(to, content, quotedMsg);
-        },
-        { to, content, quotedMsg }
-      );
+  ): Promise<Message> {
+    const result = await this.page.evaluate(
+      ({ to, content, quotedMsg }) => {
+        return WPP.chat.sendTextMessage(to, content, { quotedMsg });
+      },
+      { to, content, quotedMsg }
+    );
 
-      if (result['erro'] == true) {
-        reject(result);
-      } else {
-        resolve(result);
-      }
-    });
+    const message = (await this.page.evaluate(
+      (messageId: any) => WAPI.getMessageById(messageId),
+      result.id
+    )) as Message;
+    if (message['erro'] == true) {
+      throw message;
+    }
+    return message;
   }
 
   /**
    * Send audio base64
    * @param to Chat id
-   * @param base64 base64 data
+   * @param base64 base64 data. MUST start with "data:(yourMimeType);base64,"
    */
   public async sendVoiceBase64(to: string, base64: string) {
     return new Promise(async (resolve, reject) => {
@@ -533,7 +565,7 @@ export class SenderLayer extends ListenerLayer {
         obj = {
           erro: true,
           to: to,
-          text: 'Invalid base64!'
+          text: 'Invalid base64 or missing MimeType!'
         };
         return reject(obj);
       }
@@ -613,7 +645,7 @@ export class SenderLayer extends ListenerLayer {
    * Sends file
    * base64 parameter should have mime type already defined
    * @param to Chat id
-   * @param base64 base64 data
+   * @param base64 base64 data. MUST start with "data:(yourMimeType);base64,"
    * @param filename
    * @param caption
    */
@@ -630,7 +662,7 @@ export class SenderLayer extends ListenerLayer {
         obj = {
           erro: true,
           to: to,
-          text: 'Invalid base64!'
+          text: 'Invalid base64 or missing MimeType!'
         };
         return reject(obj);
       }
@@ -944,6 +976,7 @@ export class SenderLayer extends ListenerLayer {
         { to, latitude, longitude, title }
       );
       if (result['erro'] == true) {
+        console.log(result);
         reject(result);
       } else {
         resolve(result);

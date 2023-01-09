@@ -55,13 +55,9 @@ MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 
 import * as chalk from 'chalk';
 
-import * as fs from 'fs';
-
-import { fstat, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 
 import { Browser, Page } from 'puppeteer';
-
-import path = require('path');
 
 import { deleteFiles, checkingCloses } from '../api/helpers';
 import { Whatsapp } from '../api/whatsapp';
@@ -69,9 +65,15 @@ import { CreateConfig, defaultOptions } from '../config/create-config';
 import { tokenSession } from '../config/tokenSession.config';
 import { checkFileJson } from '../api/helpers/check-token-file';
 import { SocketState, SocketStream } from '../api/model/enum';
-import { SessionTokenCkeck, saveToken } from './auth';
-import { initWhatsapp, initBrowser } from './browser';
+import { SessionTokenCkeck, saveToken, isBeta } from './auth';
+import {
+  initWhatsapp,
+  initBrowser,
+  injectApi,
+  getWhatsappPage
+} from './browser';
 import { welcomeScreen } from './welcome';
+const path = require('path');
 /**
  * A callback will be received, informing the status of the qrcode
  */
@@ -153,7 +155,7 @@ export async function create(
   ) {
     session = sessionOrOption.replace(/\s/g, '');
   } else if (typeof sessionOrOption === 'object') {
-    session = sessionOrOption.session;
+    session = sessionOrOption.session || session;
     catchQR = sessionOrOption.catchQR || catchQR;
     statusFind = sessionOrOption.statusFind || statusFind;
     browserSessionToken =
@@ -162,19 +164,6 @@ export async function create(
     options = sessionOrOption;
   }
   let browserToken: any;
-  if (options?.multidevice != false) {
-    const dirPath = `./${defaultOptions.folderNameToken}/${session}`;
-
-    let existFile = fs.existsSync(dirPath + '.data.json');
-
-    if (existFile) {
-      fs.unlinkSync(dirPath + '.data.json');
-    }
-
-    defaultOptions.puppeteerOptions = {
-      userDataDir: dirPath
-    };
-  }
 
   const mergedOptions = { ...defaultOptions, ...options };
 
@@ -183,20 +172,25 @@ export async function create(
   if (!mergedOptions.disableWelcome) {
     welcomeScreen();
   }
+
+  logger.info(`${chalk.underline('https://orkestral.io - official site!')}\n`);
+
+  statusFind && statusFind('initBrowser', session);
+
   // Initialize whatsapp
   if (mergedOptions.browserWS) {
-    logger.info('Initializing browser...', { session });
+    logger.info(`Waiting... checking the wss server...`, { session });
   } else {
-    logger.info('Initializing browser wss...', { session });
+    logger.info('Waiting... checking the browser...', { session });
   }
 
-  const browser = await initBrowser(session, mergedOptions);
+  const browser = await initBrowser(session, mergedOptions, logger);
   // Erro of connect wss
   if (typeof browser === 'string' && browser === 'connect') {
     logger.info('Error when try to connect ' + mergedOptions.browserWS, {
       session
     });
-    statusFind && statusFind('serverWssNotConnected', this.session);
+    statusFind && statusFind('serverWssNotConnected', session);
     throw `Error when try to connect ${mergedOptions.browserWS}`;
   }
 
@@ -205,7 +199,7 @@ export async function create(
     logger.info('Error no open browser.... ', {
       session
     });
-    statusFind && statusFind('noOpenBrowser', this.session);
+    statusFind && statusFind('noOpenBrowser', session);
     throw `Error no open browser....`;
   }
 
@@ -213,7 +207,9 @@ export async function create(
     logger.info('Has been properly connected to the wss server', {
       session
     });
+    statusFind && statusFind('connectBrowserWs', session);
   } else {
+    statusFind && statusFind('openBrowser', session);
     logger.info('Browser successfully opened', {
       session
     });
@@ -251,11 +247,15 @@ export async function create(
     if (SessionTokenCkeck(browserSessionToken)) {
       browserToken = browserSessionToken;
     }
+
     logger.info('Checking page...', {
       session
     });
 
-    // Initialize whatsapp
+    statusFind && statusFind('initWhatsapp', session);
+
+    const newPage: Page = await getWhatsappPage(browser);
+    const client = new Whatsapp(newPage, session, mergedOptions);
     const page: false | Page = await initWhatsapp(
       session,
       mergedOptions,
@@ -271,14 +271,15 @@ export async function create(
       logger.info('Error accessing the page: "https://web.whatsapp.com"', {
         session
       });
+
+      statusFind && statusFind('erroPageWhatsapp', session);
       throw 'Error when trying to access the page: "https://web.whatsapp.com"';
     }
 
+    statusFind && statusFind('successPageWhatsapp', session);
     logger.info(`${chalk.green('Page successfully accessed')}`, {
       session
     });
-
-    const client = new Whatsapp(page, session, mergedOptions);
 
     client.onStreamChange(async (stateStream) => {
       if (stateStream === SocketStream.CONNECTED) {
@@ -289,7 +290,7 @@ export async function create(
           () => {
             if (
               document.querySelector('canvas') &&
-              document.querySelectorAll('#startup').length == 0
+              document.querySelectorAll('._2Nr6U').length == 0
             ) {
               return true;
             }
@@ -310,21 +311,31 @@ export async function create(
 
     client.onStateChange(async (state) => {
       if (state === SocketState.PAIRING) {
-        await page.waitForFunction(
-          () => {
-            if (document.querySelectorAll('#startup').length) {
+        const device: Boolean = await page
+          .evaluate(() => {
+            if (
+              document.querySelector('[tabindex="-1"]') &&
+              window?.Store?.Stream?.mode == 'SYNCING' &&
+              window?.Store?.Stream?.obscurity == 'SHOW'
+            ) {
               return true;
             }
-          },
-          {
-            timeout: 0,
-            polling: 100
+            return false;
+          })
+          .catch(() => undefined);
+        if (device) {
+          const ckeckVersion = await isBeta(page);
+          if (ckeckVersion === false) {
+            await page.evaluate(async () => {
+              await window.Store.Login.triggerCriticalSyncLogout();
+            });
           }
-        );
-        if (statusFind) {
-          statusFind('deviceNotConnected', session);
+          if (statusFind) {
+            statusFind('deviceNotConnected', session);
+          }
         }
       }
+
       if (mergedOptions.createPathFileToken) {
         if (state === SocketState.CONNECTED) {
           setTimeout(() => {
@@ -338,8 +349,19 @@ export async function create(
       }
     });
 
+    page.on('dialog', async (dialog) => {
+      await dialog.accept();
+    });
+
     if (mergedOptions.waitForLogin) {
+      if (mergedOptions.debug) {
+        console.log(`\nDebug: Option waitForLogin it's true. waiting...`);
+      }
+
+      statusFind && statusFind('waitForLogin', session);
+
       const isLogged = await client.waitForLogin(catchQR, statusFind);
+
       if (!isLogged) {
         throw 'Not Logged';
       }
@@ -365,27 +387,69 @@ export async function create(
 
     if (mergedOptions.debug) {
       const debugURL = `http://localhost:${readFileSync(
-        `./${session}/DevToolsActivePort`
+        path.resolve(
+          process.cwd() + mergedOptions.mkdirFolderToken,
+          mergedOptions.folderNameToken,
+          session,
+          'DevToolsActivePort'
+        )
       ).slice(0, -54)}`;
       console.log(`\nDebug: \x1b[34m${debugURL}\x1b[0m`);
     }
-    await page.waitForSelector('#app .two', { visible: true }).catch(() => {});
-    await page.waitForFunction(
-      () => {
-        if (
-          window.Store &&
-          window.Store.WidFactory &&
-          window.Store.WidFactory.createWid
-        ) {
-          return true;
-        }
-      },
-      {
-        timeout: 0,
-        polling: 100
-      }
-    );
 
+    if (mergedOptions.debug) {
+      console.log(
+        `\nDebug: Init WP app... waitForFunction "Store" ... this might take a while`
+      );
+    }
+
+    statusFind && statusFind('waitChat', session);
+
+    await page.waitForSelector('#app .two', { visible: true }).catch(() => {});
+
+    if (mergedOptions.debug) {
+      console.log(
+        `\nDebug: Loading wp app... waitForFunction "Store" ... this might take a while also`
+      );
+    }
+
+    await page
+      .waitForFunction(
+        () => {
+          if (mergedOptions.debug) {
+            console.log(`\nDebug: Loading wp app....`);
+          }
+          const StoreKey = Object.keys(window).find(
+            (k) =>
+              !!Object.getOwnPropertyDescriptor(window[k], 'WidFactory') &&
+              !!Object.getOwnPropertyDescriptor(
+                window[k].WidFactory,
+                'createWid'
+              )
+          );
+          if (StoreKey) {
+            window.Store = window[StoreKey];
+            return true;
+          }
+          return false;
+        },
+        {
+          timeout: 0,
+          polling: 100
+        }
+      )
+      .catch(() => {});
+
+    if (mergedOptions.debug) {
+      console.log(`\nDebug: injecting Api ...`);
+    }
+
+    await injectApi(page);
+
+    if (mergedOptions.debug) {
+      console.log(`\nDebug: injecting Api done...`);
+    }
+    statusFind && statusFind('successChat', session);
     return client;
   }
 }

@@ -53,6 +53,7 @@ MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNNNNMMNNNMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 */
 import * as ChromeLauncher from 'chrome-launcher';
+import * as fs from 'fs';
 import * as path from 'path';
 import { Browser, BrowserContext, Page } from 'puppeteer';
 import puppeteer from 'puppeteer-extra';
@@ -62,6 +63,8 @@ import StealthPlugin = require('puppeteer-extra-plugin-stealth');
 import { auth_InjectToken } from './auth';
 import { useragentOverride } from '../config/WAuserAgente';
 import { tokenSession } from '../config/tokenSession.config';
+import * as chalk from 'chalk';
+import { Logger } from 'winston';
 
 export async function initWhatsapp(
   session: string,
@@ -73,17 +76,32 @@ export async function initWhatsapp(
   if (waPage != null) {
     try {
       await waPage.setUserAgent(useragentOverride);
+      await waPage.setBypassCSP(true);
+      if (
+        typeof options.userPass === 'string' &&
+        options.userPass.length &&
+        typeof options.userProxy === 'string' &&
+        options.userProxy.length &&
+        Array.isArray(options.addProxy) &&
+        options.addProxy.length
+      ) {
+        await waPage.authenticate({
+          username: options.userProxy,
+          password: options.userPass
+        });
+      }
+
       await waPage.goto(puppeteerConfig.whatsappUrl, {
         waitUntil: 'domcontentloaded'
       });
+      await browser.userAgent();
       // Auth with token
       await auth_InjectToken(waPage, session, options, token);
-      await waPage.evaluate(() => {
-        window.location.reload();
-      });
+
       return waPage;
     } catch {
       waPage.close().catch(() => {});
+      browser.close().catch(() => {});
       return false;
     }
   }
@@ -104,8 +122,37 @@ export async function injectApi(page: Page) {
     return;
   }
 
+  //  * Credits for WPPConnect Team
+  //  * Author: <Edgard Messias>
+  //  * wppconnect-team/wa-js
+  //  * https://github.com/wppconnect-team/wa-js
   await page.addScriptTag({
-    path: require.resolve(path.join(__dirname, '../lib/wapi', 'wapi.js'))
+    path: require.resolve('@wppconnect/wa-js')
+  });
+  // ********************************************
+
+  await page
+    .waitForFunction(
+      () => {
+        return typeof window.WPP !== 'undefined' && window.WPP.isReady;
+      },
+      {
+        timeout: 60000
+      }
+    )
+    .catch(() => false);
+
+  await page
+    .evaluate(() => {
+      WPP.chat.defaultSendMessageOptions.createChat = true;
+      WPP.conn.setKeepAlive(true);
+      WPP.config.poweredBy = 'Venom-Bot';
+    })
+    .catch(() => false);
+  await page.addScriptTag({
+    path: require.resolve(
+      path.join(__dirname, '../../dist/lib/wapi', 'wapi.js')
+    )
   });
 
   await page.addScriptTag({
@@ -132,20 +179,133 @@ export async function injectApi(page: Page) {
 export async function initBrowser(
   session: string,
   options: CreateConfig,
+  logger: Logger,
   extras = {}
 ): Promise<Browser | string> {
-  if (options.useChrome) {
-    const chromePath = getChrome();
-    if (chromePath) {
-      extras = { ...extras, executablePath: chromePath };
+  const chromePath = getChrome();
+  if (chromePath && options.useChrome) {
+    extras = { ...extras, executablePath: chromePath };
+  } else {
+    if (options.BrowserFetcher) {
+      const browserFetcher = puppeteer.createBrowserFetcher(undefined);
+      logger.info(`${chalk.green('Check chromium....')}`, {
+        session,
+        type: 'browser'
+      });
+      logger.info(`${chalk.green('Checking the total bytes to download!')}`, {
+        session,
+        type: 'browser-total'
+      });
+
+      await browserFetcher
+        .download(options.chromiumVersion, (downloadedByte, totalBytes) => {
+          if (downloadedByte) {
+            logger.info(`${chalk.green(`wait... ${downloadedByte}`)}`, {
+              session,
+              type: 'browser'
+            });
+          }
+          if (totalBytes) {
+            logger.info(`${chalk.green(`Total Bytes ${totalBytes}`)}`, {
+              session,
+              type: 'browser-total'
+            });
+          }
+          if (downloadedByte === totalBytes) {
+            logger.info(`${chalk.green(`extract file....`)}`, {
+              session,
+              type: 'extract-file'
+            });
+          }
+        })
+        .then((revisionInfo) => {
+          logger.info(`${chalk.green(`Chromium Finished result`)}`, {
+            session,
+            type: 'browser'
+          });
+          logger.info(`${chalk.green(`Chromium completed result`)}`, {
+            session,
+            type: 'browser-total'
+          });
+          extras = {
+            ...extras,
+            executablePath: revisionInfo.executablePath
+          };
+          puppeteerConfig.chromiumArgs.push(`--single-process`);
+        })
+        .catch((e) => {
+          logger.info(`${chalk.red(`Error chromium: ${e}`)}`, {
+            session
+          });
+          extras = {};
+        });
     } else {
-      console.log('Chrome not found, using chromium');
+      logger.info(`${chalk.red('Chrome not found, using chromium')}`, {
+        session
+      });
       extras = {};
     }
   }
 
+  const folderSession: string = path.join(
+    path.resolve(
+      process.cwd(),
+      options.mkdirFolderToken,
+      options.folderNameToken,
+      session
+    )
+  );
+
+  const folderMulidevice = path.join(
+    path.resolve(
+      process.cwd(),
+      options.mkdirFolderToken,
+      options.folderNameToken
+    )
+  );
+
+  if (!fs.existsSync(folderMulidevice)) {
+    fs.mkdirSync(folderMulidevice, {
+      recursive: true
+    });
+  }
+
+  fs.chmodSync(folderMulidevice, '777');
+
+  options.puppeteerOptions = {
+    userDataDir: folderSession
+  };
+
+  puppeteerConfig.chromiumArgs.push(`--user-data-dir=${folderSession}`);
+
   // Use stealth plugin to avoid being detected as a bot
   puppeteer.use(StealthPlugin());
+
+  if (Array.isArray(options.addProxy) && options.addProxy.length) {
+    const proxy =
+      options.addProxy[Math.floor(Math.random() * options.addProxy.length)];
+    options.browserArgs
+      ? Object.assign(options.browserArgs, [`--proxy-server=${proxy}`])
+      : Object.assign(puppeteerConfig.chromiumArgs, [
+          `--proxy-server=${proxy}`
+        ]);
+    // console.log(puppeteerConfig.chromiumArgs);
+  }
+  if (
+    Array.isArray(options?.addBrowserArgs) &&
+    options?.addBrowserArgs.length
+  ) {
+    for (
+      let index: number = 0;
+      index < options?.addBrowserArgs.length;
+      index++
+    ) {
+      const element = options?.addBrowserArgs[index];
+      if (!puppeteerConfig.chromiumArgs.includes(element)) {
+        puppeteerConfig.chromiumArgs.push(element);
+      }
+    }
+  }
 
   let browser = null;
   if (options.browserWS && options.browserWS != '') {
@@ -156,7 +316,10 @@ export async function initBrowser(
       .then((e) => {
         browser = e;
       })
-      .catch(() => {
+      .catch((e) => {
+        logger.info(`${chalk.red(`Error connect: ${e}`)}`, {
+          session
+        });
         browser = 'connect';
       });
   } else {
@@ -164,16 +327,20 @@ export async function initBrowser(
       .launch({
         headless: options.headless,
         devtools: options.devtools,
-        args: options.browserArgs
-          ? options.browserArgs
-          : [...puppeteerConfig.chromiumArgs],
+        args:
+          Array.isArray(options.browserArgs) && options.browserArgs.length
+            ? options.browserArgs
+            : [...puppeteerConfig.chromiumArgs],
         ...options.puppeteerOptions,
         ...extras
       })
       .then((e) => {
         browser = e;
       })
-      .catch(() => {
+      .catch((e) => {
+        logger.info(`${chalk.red(`Error launch: ${e}`)}`, {
+          session
+        });
         browser = 'launch';
       });
   }
@@ -183,13 +350,13 @@ export async function initBrowser(
 export async function getWhatsappPage(
   browser: Browser | BrowserContext
 ): Promise<Page> {
-  const pages = await browser.pages();
+  const pages = await browser.pages().catch();
 
   if (pages.length) {
     return pages[0];
   }
 
-  return await browser.newPage();
+  return await browser.newPage().catch();
 }
 
 /**

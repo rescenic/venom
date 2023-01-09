@@ -56,8 +56,9 @@ export const _serializeMessageObj = (obj) => {
   if (obj == undefined) {
     return null;
   }
-  const _chat = obj.chat ? WAPI._serializeChatObj(obj.chat) : {};
-  const message = {
+  const _chat = obj['chat'] ? WAPI._serializeChatObj(obj['chat']) : {};
+  if (obj.quotedMsg) obj.quotedMsgObj();
+  return Object.assign(window.WAPI._serializeRawObj(obj), {
     id: obj.id._serialized,
     from: obj.from._serialized,
     quotedParticipant: obj.quotedParticipant
@@ -96,7 +97,8 @@ export const _serializeMessageObj = (obj) => {
     chat: _chat,
     isOnline: _chat.isOnline,
     lastSeen: _chat.lastSeen,
-    quotedMsgObj: obj._quotedMsgObj,
+    quotedMsgObj: obj.quotedMsg,
+    quotedStanzaId: obj.quotedStanzaID ? obj.quotedStanzaID : undefined,
     mediaData: window.WAPI._serializeRawObj(obj.mediaData),
     caption: obj.caption,
     deprecatedMms3Url: obj.deprecatedMms3Url,
@@ -116,9 +118,9 @@ export const _serializeMessageObj = (obj) => {
     width: obj.width,
     self: obj.self,
     initialPageSize: obj.initialPageSize,
-
+    lat: obj.lat ? obj.lat : undefined,
+    lng: obj.lng ? obj.lng : undefined,
+    ack: obj.ack,
     reply: (body) => window.WAPI.reply(_chat.id._serialized, body, obj)
-  };
-
-  return Object.assign(message, Object.create(obj));
+  });
 };

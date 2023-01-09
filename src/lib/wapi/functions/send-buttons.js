@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /*
 NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
@@ -68,75 +69,30 @@ export async function sendButtons(to, title, buttons, subtitle) {
     return WAPI.scope(to, true, 404, 'It is necessary to write a subtitle!');
   }
 
-  if (Array.isArray(buttons) && buttons.length > 0) {
-    for (let index in buttons) {
-      if (typeof buttons[index] !== 'function') {
-        if (!buttons[index].buttonText) {
-          return WAPI.scope(to, true, 404, 'passed object buttonText');
-        }
-        if (typeof buttons[index].buttonText !== 'object') {
-          return WAPI.scope(to, true, 404, 'passed object value in buttonText');
-        }
-        if (!buttons[index].buttonText.displayText) {
-          return WAPI.scope(to, true, 404, 'passed object displayText');
-        }
-        if (typeof buttons[index].buttonText.displayText !== 'string') {
-          return WAPI.scope(
-            to,
-            true,
-            404,
-            'passed string value in displayText'
-          );
-        }
-        if (!buttons[index].buttonId) {
-          buttons[index].buttonId = `id${index}`;
-        }
-        if (!buttons[index].type) {
-          buttons[index].type = 1;
-        }
-      }
-    }
-  }
+  let options = {
+    useTemplateButtons: false,
+    createChat: true,
+    buttons: buttons,
+    title: title
+  };
+  let result = await WPP.chat.sendTextMessage(to, subtitle, {
+    ...options,
+    waitForAck: true
+  });
 
-  const chat = await WAPI.sendExist(to);
+  let newMsgId = WAPI.newId(result);
+  var m = {
+    type: 'Buttons',
+    dynamicReplyButtons: buttons
+  };
 
-  if (chat && chat.status != 404 && chat.id) {
-    const newMsgId = await window.WAPI.getNewMessageId(chat.id._serialized);
-    const fromwWid = await Store.MaybeMeUser.getMaybeMeUser();
-
-    const message = {
-      id: newMsgId,
-      ack: 0,
-      from: fromwWid,
-      to: chat.id,
-      local: !0,
-      self: 'out',
-      t: parseInt(new Date().getTime() / 1000),
-      isNewMsg: !0,
-      type: 'chat',
-      body: title,
-      caption: title,
-      content: title,
-      footer: subtitle,
-      isDynamicReplyButtonsMsg: true,
-      isForwarded: false,
-      isFromTemplate: false,
-      invis: true,
-      fromMe: false
-    };
-    var obj = {
-      dynamicReplyButtons: buttons
-    };
-    Object.assign(message, obj);
-    var result = (
-      await Promise.all(window.Store.addAndSendMsgToChat(chat, message))
-    )[1];
-    if (result === 'success' || result === 'OK') {
-      return WAPI.scope(newMsgId, false, result, null);
-    } else {
-      return WAPI.scope(newMsgId, true, result, null);
-    }
+  if (result.sendMsgResult._value === 'OK') {
+    let obj = WAPI.scope(newMsgId, false, result.sendMsgResult._value, null);
+    Object.assign(obj, m);
+    return obj;
   } else {
-    return chat;
+    let obj = WAPI.scope(newMsgId, true, result.sendMsgResult._value, null);
+    Object.assign(obj, m);
+    return obj;
   }
 }

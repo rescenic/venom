@@ -8,7 +8,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 export const BRAND = process.env.NAME;
 
-import latestVersion from 'latest-version';
+const latestLib = require('latest-lib');
 
 import { yo } from 'yoo-hoo';
 
@@ -33,7 +33,6 @@ export function welcomeScreen() {
 export async function checkUpdates() {
   // Check for updates if needed
   if (!updatesChecked) {
-    updatesChecked = true;
     await checkVenomVersion();
   }
 }
@@ -43,11 +42,13 @@ export async function checkUpdates() {
  */
 async function checkVenomVersion() {
   logger.info('Checking for updates');
-  await latestVersion('venom-pro')
+  await latestLib('venom-bot')
     .then((latest) => {
-      if (!upToDate(version, latest)) {
+      logger.info(latest.version);
+      logger.info(version);
+      if (!upToDate(version, latest.version)) {
         logger.info('There is a new version available');
-        logUpdateAvailable(version, latest);
+        logUpdateAvailable(version, latest.version);
       }
     })
     .catch(() => {

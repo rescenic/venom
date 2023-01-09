@@ -90,16 +90,37 @@ export const storeObjects = [
   {
     id: 'ServiceWorker',
     conditions: (module) =>
-      module.default && module.default.killServiceWorker ? module : null
+      module.default && module.default.killServiceWorker ? module : null,
+  },
+  {
+    id: 'Stream',
+    conditions: (module) =>
+      module.Stream && module.StreamInfo ? module.Stream : null,
+  },
+  {
+    id: 'Wid',
+    conditions: (module) => (module.validateWid ? module : null),
+  },
+  {
+    id: 'EphemeralFields',
+    conditions: (module) =>
+      module.getEphemeralFields ? module : null
   },
   {
     id: 'State',
-    conditions: (module) => (module.STATE && module.STREAM ? module : null)
+    conditions: (module) => (module.Socket ? module : null),
   },
   {
     id: 'WapDelete',
     conditions: (module) =>
-      module.sendConversationDelete && module.sendConversationDelete.length == 2
+      module.sendConversationDelete && module.sendConversationDelete.length > 1
+        ? module
+        : null
+  },
+  {
+    id: 'WapDeleteMsg',
+    conditions: (module) =>
+      module.sendRevokeMsgs && module.sendGroupInviteMessage
         ? module
         : null
   },
@@ -109,6 +130,11 @@ export const storeObjects = [
       module.default && module.default.ref && module.default.refTTL
         ? module.default
         : null
+  },
+  {
+     id: "ConversationMsgs",
+     conditions: (module) =>
+       (module.loadEarlierMsgs) ? module : null
   },
   {
     id: 'WapQuery',
@@ -224,7 +250,7 @@ export const storeObjects = [
   {
     id: 'MyStatus',
     conditions: (module) =>
-      module.getStatus && module.setMyStatus ? module : null
+      module.getStatus && module.setMyStatus && module.queryStatusAll ? module : null
   },
   {
     id: 'ChatState',
@@ -326,8 +352,17 @@ export const storeObjects = [
   {
     id: 'Cmd',
     conditions: (module) =>
-      module.default && module.default.openChatFromUnread ? module : null
+      module.Cmd && module.Cmd.openChatFromUnread ? module.Cmd : null
   },
+  { id: "WapQuery",
+   conditions: (module) =>
+    (module.queryExist) ? module : ((module.default && module.default.queryExist) ? module.default : null)
+  },
+  {
+    id: 'checkNumberMD',
+    conditions: (module) =>
+        module.queryExists && module.queryPhoneExists ? module : null,
+},
   {
     id: 'ReadSeen',
     conditions: (module) => (module.sendSeen ? module : null)
@@ -391,11 +426,6 @@ export const storeObjects = [
       module.default && module.default._logOnlineOffline ? module.default : null
   },
   {
-    id: 'Stream',
-    conditions: (module) =>
-      module.default && module.default.unobscure ? module.default : null
-  },
-  {
     id: 'ws2',
     conditions: (module) =>
       module.default && module.default.destroyStorage ? module.default : null
@@ -455,12 +485,18 @@ export const storeObjects = [
       module.sendDemoteParticipants ? module.sendDemoteParticipants : null
   },
   {
+    id: 'queryExist',
+    conditions: (module) =>
+      module.queryExist ?  module.queryExist : null,
+  },
+  {
+    id: 'checkNumberBeta',
+    conditions: (module) =>
+      module.queryExists && module.queryPhoneExists ? module : null,
+  },
+  {
     id: 'checkNumber',
     conditions: (module) =>
-      module.default &&
-      typeof module.default.toString === 'function' &&
-      module.default.toString().includes('Should not reach queryExists MD')
-        ? module.default
-        : null,
+      module.default && module.default.queryExist ? module.default : null,
   },
 ];

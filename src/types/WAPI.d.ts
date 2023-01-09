@@ -100,6 +100,7 @@ interface WAPI {
     skipMyMessages: boolean
   ) => Promise<object>;
   getAllChats: () => Chat[];
+  getAllGroups: () => Chat[];
   getAllChatsWithMessages: (withNewMessageOnly?: boolean) => Chat[];
   getAllChatsWithNewMsg: () => Chat[];
   getAllContacts: () => Contact[];
@@ -108,6 +109,7 @@ interface WAPI {
     includeMe: boolean,
     includeNotifications: boolean
   ) => Message[];
+  isBeta: () => boolean;
   getAllNewMessages: () => Message[];
   getAllUnreadMessages: () => PartialMessage[];
   getBatteryLevel: () => number;
@@ -216,15 +218,16 @@ interface WAPI {
   ) => Promise<SendLinkResult>;
   sendLocation: (
     to: string,
-    latitude: string,
-    longitude: string,
-    title: string
+    lat: any,
+    lng: any,
+    loc: string,
+    address?: string,
+    url?: string
   ) => Promise<object>;
   sendMessage: (to: string, content: string) => Promise<Object>;
   sendListMenu: (
     to: string,
     title: string,
-    subTitle: string,
     description: string,
     buttonText: string,
     menu: Array<any>
@@ -261,7 +264,7 @@ interface WAPI {
   setMessagesAdminsOnly: (chatId: string, option: boolean) => boolean;
   setMyName: (name: string) => void;
   setMyStatus: (to: string) => void;
-  setProfilePic: (path: string, to?: string) => Promise<boolean>;
+  setProfilePic: (path: string) => Promise<boolean>;
   setTheme: (theme?: string) => boolean;
   startTyping: (to: string) => void;
   stopTyping: (to: string) => void;
@@ -280,6 +283,8 @@ interface WAPI {
     settings: string,
     value: boolean
   ) => Promise<object>;
+  _serializeChatObj: (obj: any) => any;
+  _serializeNumberStatusObj: (obj: any) => any;
 }
 
 declare global {
